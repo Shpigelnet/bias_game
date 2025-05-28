@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סימולציית הטיות</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: #fffcef;
+            color: black;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #125bff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .instructions {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-right: 4px solid #125bff;
+        }
+
+        .scenario {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .scenario h3 {
+            color: #125bff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .scenario-image {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 15px auto;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            color: #125bff;
+            padding: 15px 0;
+            margin: 20px 0;
+            font-weight: 600;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: white;
+            color: #125bff;
+            border: 1px solid #125bff;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Assistant', sans-serif;
+        }
+
+        .btn:hover {
+            background: #125bff;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .btn.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .feedback {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 4px solid #28a745;
+        }
+
+        .bias-options {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bias-option {
+            background: white;
+            border: 1px solid #125bff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .bias-option:hover {
+            background: #f0f7ff;
+        }
+
+        .summary {
+            text-align: center;
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #125bff;
+        }
+
+        .summary h2 {
+            color: #125bff;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .summary p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .correct-answer {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-right: 4px solid #28a745;
+            text-align: center;
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .start-btn {
+            background: #125bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            font-family: 'Assistant', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #0d4ed4;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- מסך פתיחה -->
+        <div id="intro-screen">
+            <h1>סימולציית הטיות</h1>
+            <div class="instructions">
+                <p><strong>הוראות המשחק:</strong></p>
+                <p>עליכם לקרוא את התרחיש ואת הנתון שמבוסס עליו, ולאחר מכן לציין איזו הטייה אפשרית באה לידי ביטוי כאן, ומה הסכנה בהתעלמות מההטייה הזאת.</p>
+                <p>תוצגו בפניכם שלושה תרחישים שונים, וכל אחד מהם מדגים סוג אחר של הטייה בניתוח נתונים.</p>
+            </div>
+            <button class="start-btn" onclick="startGame()">להתחיל</button>
+        </div>
+
+        <!-- משחק -->
+        <div id="game-screen" class="hidden">
+            <div id="scenario-display"></div>
+            <div id="question-display"></div>
+            <div id="buttons-display"></div>
+            <div id="feedback-display"></div>
+        </div>
+
+        <!-- סיכום -->
+        <div id="summary-screen" class="hidden">
+            <div class="summary">
+                <h2>סיכום המשחק</h2>
+                <p id="score-display"></p>
+                <p>ענית בהטייה הטובה ביותר! 😉</p>
+                <button class="start-btn" onclick="restartGame()">התחלה מחדש</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                title: "תרחיש 1",
+                text: "צוות סטודנטים מהנדסי תוכנה בודק האם כדאי להשתמש במערכת ניתוח נתונים חדשה לאיתור תקלות ברשת חשמל חכמה. הצוות בעד המערכת ורוצה להוכיח שהיא יעילה. הם בוחרים לבדוק אותה על דו\"ח נתונים שבו כבר ידועות מראש תקלות שהמערכת אמורה לזהות. הם גילו שהמערכת הצליחה לזהות 24 מתוך 25 תקלות ידועות — הצלחה של 96%.",
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImJhY2tncm91bmQiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI+PHJlY3Qgd2lkdGg9IjI1IiBoZWlnaHQ9IjUwIiBmaWxsPSIjZjVmNWY1Ii8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0idXJsKCNiYWNrZ3JvdW5kKSIvPjxyZWN0IHg9IjMwIiB5PSI1MCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNTAiIGZpbGw9IiM0ZjQ2ZTUiIHJ4PSIxMCIvPjxyZWN0IHg9IjIyMCIgeT0iMzAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTkwIiBmaWxsPSIjNDY5NGVkIiByeD0iMTAiLz48cGF0aCBkPSJNNTAgMTcwIGwzMCAtMzAgbDMwIDIwIGwzMCAtNDAiIHN0cm9rZT0iIzMzMzMzMyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIi8+PHJlY3QgeD0iMjQwIiB5PSI3MCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmZmZmIi8+PHJlY3QgeD0iMjU1IiB5PSI1MCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZmZmZmZmIi8+PHJlY3QgeD0iMjcwIiB5PSI2MCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjZmZmZmZmIi8+PHJlY3QgeD0iMjg1IiB5PSI0MCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjcwIiBmaWxsPSIjZmZmZmZmIi8+PHJlY3QgeD0iMzAwIiB5PSI1NSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjU1IiBmaWxsPSIjZmZmZmZmIi8+PHRleHQgeD0iMjgwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+OTYlPC90ZXh0Pjx0ZXh0IHg9IjEwNSIgeT0iMTU1IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMzMzMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFJIEFuYWx5c2lzPC90ZXh0PjwvdXNnPjwvc3ZnPg==",
+                question: "האם ניתן לקבוע שהמערכת אמינה לשימוש מבצעי?",
+                correctBias: 0,
+                feedback: "יש כאן הטיית האישור – הצוות בדק את המערכת על מקרה שכבר מתאים למה שהם מאמינים שיעבוד. הם חיפשו לאתגר את עצמם? לא ממש. הם רק רצו אישור. ולכן הנתון הזה לא באמת מוכיח כלום."
+            },
+            {
+                title: "תרחיש 2",
+                text: "עיריית ירושלים שוקלת להקים גשר חדש להולכי רגל ורוכבי אופניים באזור גן סאקר. מהנדסי התחבורה מציגים נתון שנלקח ממעקב במצלמות תנועה: בין השנים 2005–2012, 85% מהמשתמשים בגשר הקיים היו הולכי רגל בגילאי 20–40 שהלכו ברגל ורק 15% מהמשתמשים בגשר היו רוכבי אופניים. המהנדסים ממליצים לבנות את הגשר החדש כך שיתאים להולכי רגל צעירים בלבד.",
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImJhY2tncm91bmQyIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyNSIgaGVpZ2h0PSI1MCIgZmlsbD0iI2Y1ZjVmNSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9InVybCgjYmFja2dyb3VuZDIpIi8+PHJlY3QgeD0iMzAiIHk9IjUwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzU1NzNmZiIgcng9IjEwIi8+PHJlY3QgeD0iMjAwIiB5PSI4MCIgd2lkdGg9IjE3MCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzc0YjMxNiIgcng9IjUiLz48cGF0aCBkPSJNNTAgMTcwIGwzMCAtMzAgbDMwIDIwIGwzMCAtNDAiIHN0cm9rZT0iIzMzMzMzMyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIi8+PGNpcmNsZSBjeD0iMjMwIiBjeT0iMTUwIiByPSIxOCIgZmlsbD0iIzU1NzNmZiIvPjxwYXRoIGQ9Ik0yMzAgMTM1IGwwIDMwIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Ik0yMTggMTU1IGwyNCAwIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Ik0yNjAgMTMwIGMwIDAgMTAgMCAxNSA1IGMgNSA1IDUgMTUgNSAxNSBjIDAgMTAgLTUgMTUgLTEwIDIwIGwtMTAgMTAiIHN0cm9rZT0iIzMzMzMzMyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIi8+PGNpcmNsZSBjeD0iMjcwIiBjeT0iMTI1IiByPSI1IiBmaWxsPSIjMzMzMzMzIi8+PHBhdGggZD0iTTI5MCAyMDAiIHN0cm9rZT0iIzMzMzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+PGVsbGlwc2UgY3g9IjMwMCIgY3k9IjE4MCIgcng9IjE1IiByeT0iNSIgZmlsbD0iIzMzMzMzMyIvPjxlbGxpcHNlIGN4PSIzMjAiIGN5PSIxODAiIHJ4PSIxNSIgcnk9IjUiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI5MCIgeT0iNDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MjAwNS0yMDEyPC90ZXh0Pjx0ZXh0IHg9IjI4NSIgeT0iNzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FuIFNha2VyPC90ZXh0PjwvdXNnPjwvc3ZnPg==",
+                question: "האם כדאי לבנות את הגשר החדש כך שיתאים רק להולכי רגל צעירים?",
+                correctBias: 1,
+                feedback: "יש כאן הטיית נתונים היסטורית – הנתון מתבסס על נתונים ישנים – לפני שהיו קורקינטים חשמליים, שבילי אופניים נרחבים, השתנו דפוסי תחבורה, והאזור עצמו השתנה. המבוסס על ההיסטוריה – לא רלוונטי לשאלה היום."
+            },
+            {
+                title: "תרחיש 3",
+                text: "צוות סטודנטים מציע להכניס חיישנים למדידת עומס חום במעבדות הפקולטה. הם מבקשים מהמעבדות לשלוח נתוני טמפרטורה לניתוח – ומקבלים נתונים מ-5 מעבדות שהיו מאובזרות בחיישנים איכותיים ובקרה אקלימית. הם גילו שבכל המעבדות שנבדקו לא נמדדו חריגות משמעותיות — הטמפרטורה נשארה בין 21–24 מעלות.",
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImJhY2tncm91bmQzIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyNSIgaGVpZ2h0PSI1MCIgZmlsbD0iI2Y1ZjVmNSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9InVybCgjYmFja2dyb3VuZDMpIi8+PHJlY3QgeD0iMzAiIHk9IjcwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzU1NzNmZiIgcng9IjEwIi8+PHJlY3QgeD0iMjAwIiB5PSI0MCIgd2lkdGg9IjE3MCIgaGVpZ2h0PSIxNzAiIGZpbGw9IiNmZmZmZmYiIGJvcmRlcj0iMnB4IHNvbGlkICMzMzMzMzMiIHJ4PSIxMCIvPjxwYXRoIGQ9Ik01MCAyMDAgbDMwIC0zMCBsMzAgLTIwIGwzMCAtNDAiIHN0cm9rZT0iIzU1NzNmZiIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTIyMCA3MCBsNTAgMTAgbDUwIC01IGw1MCAyMCBsNTAgLTEwIiBzdHJva2U9IiM1NTczZmYiIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0yMjAgMTAwIGw1MCA1IGw1MCA1IGw1MCA1IGw1MCA1IiBzdHJva2U9IiM1NTczZmYiIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0yMjAgMTMwIGwtNTAgMTAgbDUwIDAgbDUwIC0xMCBsNTAgNSIgc3Ryb2tlPSIjNTU3M2ZmIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiLz48Y2lyY2xlIGN4PSIzNTAiIGN5PSI5MCIgcj0iMjAiIGZpbGw9IiNmZmY3MDBiNyIgc3Ryb2tlPSIjZmZmNzAwIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMzQ1IDgwIGwxMCAxMCBsLTEwIDEwIG0wIC0xMCBsLTEwIDEwIiBzdHJva2U9IiMzMzMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjI4NSIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMzMzMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjIxLTI0wrBDPC90ZXh0PjwvdXNnPjwvc3ZnPg==",
+                question: "האם צריך להתקין חיישנים למדידת עומס חום במעבדות?",
+                correctBias: 2,
+                feedback: "יש כאן הטיית הבחירה – הנתונים הגיעו רק ממעבדות שכבר מתוחזקות היטב ומספר מצומצם של מעבדות. מי שאין לו חיישנים – לא שלח נתונים. וזה מעוות את התמונה כאילו \"הכול בסדר\"."
+            }
+        ];
+
+        const biasOptions = [
+            "הטיית האישור",
+            "הטיית נתונים היסטורית", 
+            "הטיית הבחירה"
+        ];
+
+        let currentScenario = 0;
+        let correctAnswers = 0;
+        let gamePhase = 'initial'; // 'initial', 'bias', 'feedback'
+
+        function startGame() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            currentScenario = 0;
+            correctAnswers = 0;
+            showScenario();
+        }
+
+        function showScenario() {
+            const scenario = scenarios[currentScenario];
+            gamePhase = 'initial';
+            
+            document.getElementById('scenario-display').innerHTML = `
+                <div class="scenario">
+                    <h3>${scenario.title}</h3>
+                    <img src="${scenario.image}" alt="תמונה לתרחיש ${currentScenario + 1}" class="scenario-image">
+                    <p>${scenario.text}</p>
+                </div>
+            `;
+            
+            document.getElementById('question-display').innerHTML = `
+                <div class="question">${scenario.question}</div>
+            `;
+            
+            document.getElementById('buttons-display').innerHTML = `
+                <div class="buttons">
+                    <button class="btn" onclick="handleInitialAnswer(true)">כן ✓</button>
+                    <button class="btn" onclick="handleInitialAnswer(false)">לא ✗</button>
+                </div>
+            `;
+            
+            document.getElementById('feedback-display').innerHTML = '';
+        }
+
+        function handleInitialAnswer(answer) {
+            if (answer === true) {
+                // אם ענה "כן" - הראה הודעה ואז עבור לשאלת ההטייה
+                document.getElementById('buttons-display').innerHTML = `
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin: 20px 0; border-right: 4px solid #ffc107; text-align: center;">
+                        <strong>לא מדוייק!</strong> יש כאן הטייה של הנתונים. עליך לזהות את ההטייה הרלוונטית.
+                    </div>
+                    <div class="buttons">
+                        <button class="btn" onclick="showBiasQuestion()">המשך לזיהוי ההטייה</button>
+                    </div>
+                `;
+            } else {
+                // אם ענה "לא" - הראה פידבק חיובי ואז עבור לשאלת ההטייה
+                document.getElementById('buttons-display').innerHTML = `
+                    <div class="correct-answer">
+                        נכון! ✓
+                    </div>
+                    <div class="buttons">
+                        <button class="btn" onclick="showBiasQuestion()">המשך לזיהוי ההטייה</button>
+                    </div>
+                `;
+            }
+        }
+
+        function showBiasQuestion() {
+            gamePhase = 'bias';
+            const scenario = scenarios[currentScenario];
+            
+            document.getElementById('question-display').innerHTML = `
+                <div class="question">למה לא? איזו הטייה מתרחשת כאן?</div>
+            `;
+            
+            let optionsHTML = '<div class="bias-options">';
+            biasOptions.forEach((option, index) => {
+                optionsHTML += `<div class="bias-option" onclick="handleBiasAnswer(${index})">${option}</div>`;
+            });
+            optionsHTML += '</div>';
+            
+            document.getElementById('buttons-display').innerHTML = optionsHTML;
+        }
+
+        function handleBiasAnswer(selectedBias) {
+            gamePhase = 'feedback';
+            const scenario = scenarios[currentScenario];
+            const isCorrect = selectedBias === scenario.correctBias;
+            
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            // צבע את התשובות
+            const options = document.querySelectorAll('.bias-option');
+            options.forEach((option, index) => {
+                if (index === selectedBias && !isCorrect) {
+                    option.classList.add('incorrect');
+                    option.style.background = '#dc3545';
+                    option.style.color = 'white';
+                    option.style.borderColor = '#dc3545';
+                } else if (index === scenario.correctBias) {
+                    option.classList.add('correct');
+                    option.style.background = '#28a745';
+                    option.style.color = 'white';
+                    option.style.borderColor = '#28a745';
+                }
+                option.style.pointerEvents = 'none';
+            });
+            
+            // הראה פידבק
+            document.getElementById('feedback-display').innerHTML = `
+                <div class="feedback">
+                    ${scenario.feedback}
+                </div>
+                <div class="buttons">
+                    <button class="btn" onclick="nextScenario()">${currentScenario < scenarios.length - 1 ? 'לשאלה הבאה' : 'לסיכום'}</button>
+                </div>
+            `;
+        }
+
+        function nextScenario() {
+            currentScenario++;
+            if (currentScenario < scenarios.length) {
+                showScenario();
+            } else {
+                showSummary();
+            }
+        }
+
+        function showSummary() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+            
+            document.getElementById('score-display').textContent = 
+                `ענית על ${correctAnswers}/${scenarios.length} תשובות נכונות`;
+        }
+
+        function restartGame() {
+            document.getElementById('summary-screen').classList.add('hidden');
+            document.getElementById('intro-screen').classList.remove('hidden');
+            currentScenario = 0;
+            correctAnswers = 0;
+        }
+    </script>
+</body>
+</html>
